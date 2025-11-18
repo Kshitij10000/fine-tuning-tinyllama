@@ -1,0 +1,8 @@
+
+Installation Guide
+
+1. Create a Python virtual environment and activate it.
+2. Check that your GPU is detected by running `nvidia-smi` in the terminal; note the CUDA version, GPU type, and available memory.
+3. Install the PyTorch build that matches your CUDA version. Refer to https://pytorch.org/get-started/previous-versions/ for the correct command.
+4. Example (CUDA 13.0): `pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cu130`
+also install datasets transformers peft bitsandbytes
