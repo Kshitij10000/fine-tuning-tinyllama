@@ -1,8 +1,55 @@
 
-Installation Guide
+TinyLlama LoRA Training
+=======================
 
-1. Create a Python virtual environment and activate it.
-2. Check that your GPU is detected by running `nvidia-smi` in the terminal; note the CUDA version, GPU type, and available memory.
-3. Install the PyTorch build that matches your CUDA version. Refer to https://pytorch.org/get-started/previous-versions/ for the correct command.
-4. Example (CUDA 13.0): `pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cu130`
-also install datasets transformers peft bitsandbytes
+## Overview
+- Fine-tunes TinyLlama on the GSM8K reasoning dataset using LoRA adapters.
+- Training happens inside `training_model.ipynb`; checkpoints live in `lora-tinyllama-gsm8k/`.
+- Post-training weights and tokenizer artifacts are copied to `lora-tinyllama-gsm8k-after-train/` for export or deployment.
+
+## Prerequisites
+- Python 3.10+ and `pip`.
+- NVIDIA GPU with at least 12 GB VRAM, CUDA drivers installed, and `nvidia-smi` available.
+- Git LFS (optional) if you want to sync checkpoints with a remote.
+
+## Environment Setup
+1. Create and activate a virtual environment:
+   ```
+   python -m venv .venv
+   .\.venv\Scripts\activate
+   ```
+2. Confirm CUDA visibility and record the version:
+   ```
+   nvidia-smi
+   ```
+3. Install the matching PyTorch wheel (replace versions with the ones listed on https://pytorch.org/get-started/previous-versions/):
+   ```
+   pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu121
+   ```
+4. Install the project dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+## Training Workflow
+1. Launch Jupyter and open `training_model.ipynb`:
+   ```
+   jupyter notebook training_model.ipynb
+   ```
+2. Work through the notebook cells in order:
+   - Data prep / GSM8K formatting.
+   - LoRA configuration (rank, alpha, dropout).
+   - Training loop (uses Hugging Face `Trainer` with gradient accumulation).
+   - Periodic evaluation and checkpoint saving.
+3. Checkpoints are written under `lora-tinyllama-gsm8k/checkpoint-*/`. Each folder contains the LoRA weights, tokenizer snapshots, and trainer states.
+
+## After Training
+- The `lora-tinyllama-gsm8k-after-train/` directory contains the final adapter and tokenizer for deployment.
+- Use `peft` to merge adapters into the base TinyLlama if you need a standalone model.
+- Keep the best checkpoint metadata (perplexity, GSM8K accuracy) in `model_evaluation.ipynb` for reproducibility.
+
+## Tips & Troubleshooting
+- If PyTorch cannot see the GPU, reinstall the exact CUDA matching wheel and reboot.
+- Adjust batch size or gradient accumulation to fit VRAM limits.
+- To resume training from a checkpoint, point the notebook’s `resume_from_checkpoint` parameter to the desired folder.
+- Run `pip list --outdated` periodically to ensure dependencies remain compatible.
